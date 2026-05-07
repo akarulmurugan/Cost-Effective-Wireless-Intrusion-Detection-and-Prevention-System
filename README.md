@@ -767,8 +767,8 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 ## 👨‍💻 Author
 
-**[Your Name]**
-Department of Computer Science and Engineering
+**Arul Murugan**
+Department of Cyber Security
 Mahendra Engineering College (Autonomous), Namakkal
 
 ---
