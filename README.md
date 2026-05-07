@@ -4,7 +4,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-3.0-000000?style=for-the-badge&logo=flask&logoColor=white)
-![Kali Linux](https://img.shields.io/badge/Kali_Linux-2024-557C94?style=for-the-badge&logo=kalilinux&logoColor=white)
+![Kali Linux](https://img.shields.io/badge/Kali_Linux-2026-557C94?style=for-the-badge&logo=kalilinux&logoColor=white)
 ![ESP32](https://img.shields.io/badge/ESP32-Hardware_Sensor-E7352C?style=for-the-badge&logo=espressif&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
@@ -136,7 +136,7 @@ Internet restored + Certificate generated
 
 | Component | Purpose | Example |
 |-----------|---------|---------|
-| **Linux Machine** | Detection host (VM or bare metal) | Kali Linux 2024 |
+| **Linux Machine** | Detection host (VM or bare metal) | Kali Linux 2026 |
 | **Ethernet NIC** | LAN connection (eth0) | Built-in or USB adapter |
 | **USB Wi-Fi Adapter** | Monitor mode — L2 deauth injection | Alfa AWUS036NHA |
 | **ESP32 Board** | 802.11 frame capture — 13 channels | ESP32-WROOM-32 |
@@ -151,7 +151,7 @@ Internet restored + Certificate generated
 
 | Software | Version | Install |
 |----------|---------|---------|
-| Kali Linux | 2024.1+ | Guest VM or bare metal |
+| Kali Linux | 2026 | Guest VM or bare metal |
 | Python | 3.11+ | Pre-installed on Kali |
 | Flask | 3.0 | `pip install flask` |
 | Scapy | 2.5+ | `pip install scapy` |
