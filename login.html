@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WIDS Admin Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#030810;--card:#060f1e;
+  --cyan:#00ffe0;--cyan2:#00bfaa;
+  --green:#00ff88;--red:#ff2244;--amber:#ffaa00;
+  --text:#c8e8f0;--muted:#3a6070;
+  --border:rgba(0,255,224,0.15);
+  --mono:'Share Tech Mono',monospace;
+  --disp:'Orbitron',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,
+  rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px);}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(0,255,224,.025) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(0,255,224,.025) 1px,transparent 1px);
+  background-size:48px 48px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  width:100%;max-width:380px;padding:38px 32px;position:relative;z-index:1;
+  box-shadow:0 0 60px rgba(0,255,224,.08);}
+
+/* logo */
+.logo{text-align:center;margin-bottom:28px;}
+.logo-icon{width:56px;height:56px;border:2px solid var(--cyan);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;margin:0 auto 14px;
+  animation:glow 3s ease-in-out infinite;position:relative;overflow:hidden;}
+.logo-icon::after{content:'';position:absolute;top:-100%;left:0;right:0;height:100%;
+  background:linear-gradient(transparent,rgba(0,255,224,.2),transparent);
+  animation:sweep 2s linear infinite;}
+@keyframes sweep{to{top:200%;}}
+@keyframes glow{0%,100%{box-shadow:0 0 10px rgba(0,255,224,.3);}
+  50%{box-shadow:0 0 30px rgba(0,255,224,.7);}}
+.logo-icon svg{width:26px;height:26px;fill:none;stroke:var(--cyan);stroke-width:1.5;}
+.logo h1{font-family:var(--disp);font-size:15px;font-weight:900;
+  color:var(--cyan);letter-spacing:3px;margin-bottom:3px;}
+.logo p{font-size:8px;color:var(--muted);letter-spacing:2px;}
+
+/* step indicator */
+.steps{display:flex;margin-bottom:24px;border-radius:6px;overflow:hidden;
+  border:1px solid var(--border);}
+.step-ind{flex:1;padding:7px;text-align:center;font-size:8px;
+  letter-spacing:2px;text-transform:uppercase;color:var(--muted);
+  background:transparent;transition:all .3s;}
+.step-ind.active{background:rgba(0,255,224,.08);color:var(--cyan);}
+.step-ind.done{background:rgba(0,255,136,.06);color:var(--green);}
+.step-sep{width:1px;background:var(--border);}
+
+/* form */
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:8px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.field input{width:100%;background:rgba(0,255,224,.04);
+  border:1px solid var(--border);color:var(--cyan);
+  font-family:var(--mono);font-size:13px;padding:11px 13px;
+  border-radius:6px;outline:none;transition:border-color .2s;}
+.field input:focus{border-color:rgba(0,255,224,.5);
+  box-shadow:0 0 10px rgba(0,255,224,.1);}
+.field input::placeholder{color:var(--muted);font-size:11px;}
+.field input.otp-field{font-size:24px;letter-spacing:10px;text-align:center;}
+
+/* button */
+.submit-btn{width:100%;padding:13px;margin-top:6px;
+  background:rgba(0,255,224,.1);border:1px solid rgba(0,255,224,.35);
+  border-radius:6px;color:var(--cyan);font-family:var(--mono);font-size:10px;
+  letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.submit-btn:hover:not(:disabled){background:rgba(0,255,224,.2);
+  box-shadow:0 0 20px rgba(0,255,224,.2);}
+.submit-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* messages */
+.msg{margin-top:12px;padding:10px 13px;border-radius:6px;font-size:11px;
+  line-height:1.5;display:none;}
+.msg.show{display:block;}
+.msg.err{background:rgba(255,34,68,.08);color:#ff8899;
+  border:1px solid rgba(255,34,68,.25);}
+.msg.ok{background:rgba(0,255,136,.08);color:var(--green);
+  border:1px solid rgba(0,255,136,.25);}
+.msg.warn{background:rgba(255,170,0,.08);color:var(--amber);
+  border:1px solid rgba(255,170,0,.2);}
+
+/* timer */
+.timer{font-size:10px;color:var(--muted);text-align:center;
+  margin-top:9px;letter-spacing:1px;}
+.timer span{color:var(--amber);}
+
+/* hint */
+.hint{font-size:10px;color:var(--muted);text-align:center;
+  margin-top:14px;line-height:1.6;}
+.hint a{color:var(--muted);cursor:pointer;text-decoration:underline;}
+.hint a:hover{color:var(--cyan2);}
+
+/* section toggle */
+.sec{display:none;}
+.sec.active{display:block;}
+</style>
+</head>
+<body>
+<div class="card">
+
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2L2 7v5c0 5.5 4.2 10.7 10 12 5.8-1.3 10-6.5 10-12V7L12 2z"/>
+        <path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h1>WIDS ADMIN</h1>
+    <p>SECURE COMMAND ACCESS · v3.0</p>
+  </div>
+
+  <!-- Step indicator -->
+  <div class="steps">
+    <div class="step-ind active" id="ind1">1 · Credentials</div>
+    <div class="step-sep"></div>
+    <div class="step-ind" id="ind2">2 · OTP Verify</div>
+  </div>
+
+  <!-- STEP 1: Username + Password -->
+  <div class="sec active" id="sec1">
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="username" placeholder="admin"
+        autocomplete="username" spellcheck="false">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••"
+        autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')submitCreds()">
+    </div>
+    <button class="submit-btn" id="credsBtn" onclick="submitCreds()">
+      VERIFY CREDENTIALS
+    </button>
+    <div id="credsMsg" class="msg"></div>
+    <div class="hint">
+      Enter admin credentials.<br>
+      An OTP will be sent to your Telegram on success.
+    </div>
+  </div>
+
+  <!-- STEP 2: OTP -->
+  <div class="sec" id="sec2">
+    <div class="field">
+      <label>6-Digit OTP from Telegram</label>
+      <input type="text" id="otpInput" class="otp-field"
+        inputmode="numeric" pattern="[0-9]*"
+        maxlength="6" placeholder="• • • • • •"
+        autocomplete="one-time-code"
+        oninput="this.value=this.value.replace(/[^0-9]/g,'');
+                 if(this.value.length===6)submitOTP()">
+    </div>
+    <button class="submit-btn" id="otpBtn" onclick="submitOTP()">
+      VERIFY OTP
+    </button>
+    <div id="otpMsg" class="msg"></div>
+    <div class="timer" id="otpTimer"></div>
+    <div class="hint">
+      Check your Telegram for the 6-digit OTP.<br>
+      Expires in <strong style="color:var(--amber)">2 minutes</strong>.<br><br>
+      <a onclick="goBack()">← Back to credentials</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let _pendingToken='';
+let _timerInterval;
+let _countdown=120;
+
+function showMsg(id,text,type){
+  const m=document.getElementById(id);
+  m.textContent=text; m.className='msg '+type+' show';}
+function hideMsg(id){
+  document.getElementById(id).className='msg';}
+
+async function submitCreds(){
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value;
+  if(!u||!p){showMsg('credsMsg','Enter username and password.','warn');return;}
+  const btn=document.getElementById('credsBtn');
+  btn.disabled=true; btn.textContent='VERIFYING...';
+  hideMsg('credsMsg');
+  try{
+    const res=await fetch('/auth/login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username:u,password:p})});
+    const data=await res.json();
+    if(data.status==='ok'){
+      _pendingToken=data.pending_token;
+      showMsg('credsMsg','✓ OTP sent to Telegram.','ok');
+      setTimeout(()=>{
+        document.getElementById('sec1').className='sec';
+        document.getElementById('sec2').className='sec active';
+        document.getElementById('ind1').className='step-ind done';
+        document.getElementById('ind2').className='step-ind active';
+        document.getElementById('otpInput').focus();
+        startTimer();
+      },700);
+    }else if(data.status==='locked'){
+      showMsg('credsMsg','🔒 '+data.message,'err');
+      btn.disabled=false; btn.textContent='VERIFY CREDENTIALS';
+    }else{
+      showMsg('credsMsg','✗ '+data.message,'err');
+      document.getElementById('password').value='';
+      document.getElementById('password').focus();
+      btn.disabled=false; btn.textContent='VERIFY CREDENTIALS';
+    }
+  }catch(e){
+    showMsg('credsMsg','Network error.','warn');
+    btn.disabled=false; btn.textContent='VERIFY CREDENTIALS';
+  }
+}
+
+async function submitOTP(){
+  const otp=document.getElementById('otpInput').value.trim();
+  if(otp.length!==6){showMsg('otpMsg','Enter all 6 digits.','warn');return;}
+  if(!_pendingToken){showMsg('otpMsg','Session expired. Go back.','err');return;}
+  const btn=document.getElementById('otpBtn');
+  btn.disabled=true; btn.textContent='VERIFYING...';
+  hideMsg('otpMsg');
+  try{
+    const res=await fetch('/auth/verify_otp',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({pending_token:_pendingToken,otp:otp})});
+    const data=await res.json();
+    if(data.status==='ok'){
+      clearInterval(_timerInterval);
+      showMsg('otpMsg','✓ Access granted! Loading dashboard...','ok');
+      setTimeout(()=>window.location.href='/',1000);
+    }else if(data.status==='wrong'){
+      showMsg('otpMsg','✗ '+data.message,'err');
+      document.getElementById('otpInput').value='';
+      document.getElementById('otpInput').focus();
+      btn.disabled=false; btn.textContent='VERIFY OTP';
+    }else if(data.status==='locked'){
+      showMsg('otpMsg','🔒 '+data.message,'err');
+      btn.textContent='LOCKED';
+    }else if(data.status==='expired'){
+      showMsg('otpMsg','⏱ OTP expired. Please login again.','warn');
+      clearInterval(_timerInterval);
+      setTimeout(goBack,2000);
+    }else{
+      showMsg('otpMsg',data.message||'Error.','warn');
+      btn.disabled=false; btn.textContent='VERIFY OTP';
+    }
+  }catch(e){
+    showMsg('otpMsg','Network error.','warn');
+    btn.disabled=false; btn.textContent='VERIFY OTP';
+  }
+}
+
+function startTimer(){
+  _countdown=120; updateTimer();
+  _timerInterval=setInterval(()=>{
+    _countdown--;updateTimer();
+    if(_countdown<=0){
+      clearInterval(_timerInterval);
+      showMsg('otpMsg','⏱ OTP expired.','warn');
+      setTimeout(goBack,2000);}
+  },1000);}
+
+function updateTimer(){
+  const m=Math.floor(_countdown/60),s=_countdown%60;
+  document.getElementById('otpTimer').innerHTML=
+    'OTP expires in: <span>'+m+':'+String(s).padStart(2,'0')+'</span>';}
+
+function goBack(){
+  clearInterval(_timerInterval); _pendingToken='';
+  document.getElementById('sec2').className='sec';
+  document.getElementById('sec1').className='sec active';
+  document.getElementById('ind1').className='step-ind active';
+  document.getElementById('ind2').className='step-ind';
+  document.getElementById('otpInput').value='';
+  document.getElementById('password').value='';
+  hideMsg('credsMsg'); hideMsg('otpMsg');
+  document.getElementById('credsBtn').disabled=false;
+  document.getElementById('credsBtn').textContent='VERIFY CREDENTIALS';
+  document.getElementById('username').focus();}
+
+window.onload=()=>document.getElementById('username').focus();
+</script>
+</body>
+</html>

@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>WIDS Command Center v3.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#030810;--bg2:#060f1e;--panel:rgba(6,15,30,0.92);
+  --cyan:#00ffe0;--cyan2:#00bfaa;--red:#ff2244;--green:#00ff88;
+  --amber:#ffaa00;--purple:#a78bfa;--text:#c8e8f0;--muted:#3a6070;
+  --border:rgba(0,255,224,0.13);--bfaint:rgba(0,255,224,0.05);
+  --mono:'Share Tech Mono',monospace;--disp:'Orbitron',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px);}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(0,255,224,.025) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(0,255,224,.025) 1px,transparent 1px);background-size:48px 48px;}
+.wrap{position:relative;z-index:1;padding:14px 18px;max-width:1600px;margin:0 auto;}
+
+/* topbar */
+.topbar{display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-box{width:38px;height:38px;border:1.5px solid var(--cyan);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+  animation:iglow 3s ease-in-out infinite;}
+.logo-box::after{content:'';position:absolute;top:-100%;left:0;right:0;height:100%;
+  background:linear-gradient(transparent,rgba(0,255,224,.18),transparent);animation:sweep 2.2s linear infinite;}
+@keyframes sweep{to{top:200%;}} @keyframes iglow{0%,100%{box-shadow:0 0 8px rgba(0,255,224,.25);}50%{box-shadow:0 0 24px rgba(0,255,224,.6);}}
+.logo-box svg{width:18px;height:18px;fill:none;stroke:var(--cyan);stroke-width:1.5;}
+.logo h1{font-family:var(--disp);font-size:13px;font-weight:900;color:var(--cyan);letter-spacing:3px;}
+.logo p{font-size:8px;color:var(--muted);letter-spacing:2px;margin-top:2px;}
+.tr{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.ssid-tag{background:rgba(0,255,224,.07);border:1px solid var(--border);
+  padding:3px 8px;border-radius:3px;font-size:8px;color:var(--cyan2);letter-spacing:1.5px;}
+.pill{display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:3px;
+  font-size:8px;letter-spacing:1.5px;text-transform:uppercase;font-weight:bold;border:1px solid;}
+.pill .d{width:5px;height:5px;border-radius:50%;}
+.pon{background:rgba(0,255,136,.07);color:var(--green);border-color:rgba(0,255,136,.25);}
+.pon .d{background:var(--green);animation:blink 1.2s infinite;}
+.poff{background:rgba(40,50,60,.5);color:#445;border-color:#223;}
+.poff .d{background:#334;}
+.pamber{background:rgba(255,170,0,.08);color:var(--amber);border-color:rgba(255,170,0,.25);}
+.pamber .d{background:var(--amber);animation:blink 1.5s infinite;}
+.potp{background:rgba(167,139,250,.1);color:var(--purple);border-color:rgba(167,139,250,.3);}
+.potp .d{background:var(--purple);animation:blink 2s infinite;}
+.preq{background:rgba(255,34,68,.1);color:var(--red);border-color:rgba(255,34,68,.35);animation:wpulse 1s infinite;}
+.preq .d{background:var(--red);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes wpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,34,68,.5)}50%{box-shadow:0 0 10px 2px rgba(255,34,68,.25)}}
+.logout-btn{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  padding:4px 10px;border:1px solid rgba(255,34,68,.3);border-radius:3px;
+  color:var(--red);background:transparent;cursor:pointer;transition:all .2s;}
+.logout-btn:hover{background:rgba(255,34,68,.12);}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px;}
+.sc{background:var(--panel);border:1px solid var(--border);border-radius:7px;
+  padding:12px 13px 10px;position:relative;overflow:hidden;}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.cc::before{background:var(--cyan);box-shadow:0 0 12px rgba(0,255,224,.5);}
+.cg::before{background:var(--green);}
+.cr::before{background:var(--red);}
+.ca::before{background:var(--amber);}
+.cp::before{background:var(--purple);}
+.sl{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.sv{font-family:var(--disp);font-size:28px;font-weight:900;line-height:1;margin-bottom:2px;}
+.cc .sv{color:var(--cyan);}  .cg .sv{color:var(--green);}
+.cr .sv{color:var(--red);}   .ca .sv{color:var(--amber);}
+.cp .sv{color:var(--purple);}
+.ss{font-size:8px;color:var(--muted);}
+.spark{margin-top:4px;}
+.spark canvas{width:100%!important;height:20px!important;display:block;}
+
+/* chart */
+.cp2{background:var(--panel);border:1px solid var(--border);border-radius:7px;
+  padding:10px 12px;margin-bottom:10px;}
+.chd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.ct{font-family:var(--disp);font-size:7px;letter-spacing:3px;color:var(--muted);}
+.cl{font-size:8px;color:var(--green);}  .cl::before{content:'● ';animation:blink 1s infinite;}
+#mc{width:100%!important;height:44px!important;display:block;}
+
+/* input row */
+.irow{display:flex;gap:6px;align-items:center;background:var(--panel);
+  border:1px solid var(--border);border-radius:7px;padding:8px 10px;margin-bottom:8px;}
+.mi{flex:1;background:rgba(0,255,224,.04);border:1px solid var(--border);
+  color:var(--cyan);font-family:var(--mono);font-size:11px;padding:8px 10px;
+  border-radius:4px;letter-spacing:2px;outline:none;}
+.mi:focus{border-color:rgba(0,255,224,.45);}
+.mi::placeholder{color:var(--muted);font-size:8px;letter-spacing:1px;}
+
+/* buttons */
+.btn{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  padding:5px 10px;border:1px solid;border-radius:3px;cursor:pointer;
+  transition:all .2s;white-space:nowrap;background:transparent;}
+.ba{color:var(--cyan);border-color:rgba(0,255,224,.3);}
+.ba:hover{background:rgba(0,255,224,.12);}
+.bb{color:var(--red);border-color:rgba(255,34,68,.3);}
+.bb:hover{background:rgba(255,34,68,.15);}
+.br{color:var(--red);border-color:rgba(255,34,68,.25);}
+.br:hover{background:rgba(255,34,68,.12);}
+.bh{color:var(--amber);border-color:rgba(255,170,0,.25);}
+.bh:hover{background:rgba(255,170,0,.1);}
+.bc{color:var(--purple);border-color:rgba(167,139,250,.3);}
+.bc:hover{background:rgba(167,139,250,.12);}
+.botp{color:var(--green);border-color:rgba(0,255,136,.3);padding:5px 12px;}
+.botp:hover{background:rgba(0,255,136,.12);}
+.botp:disabled{opacity:.4;cursor:not-allowed;}
+.blg{padding:8px 14px;font-size:9px;}
+
+/* main grid */
+.mg{display:grid;grid-template-columns:290px 1fr;gap:10px;}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:7px;overflow:hidden;}
+.ph{display:flex;align-items:center;justify-content:space-between;
+  padding:9px 12px;border-bottom:1px solid var(--bfaint);}
+.pht{font-family:var(--disp);font-size:8px;letter-spacing:3px;text-transform:uppercase;font-weight:700;}
+.pht.g{color:var(--green);}  .pht.r{color:var(--red);}  .pht.p{color:var(--purple);}
+.phc{font-size:8px;padding:2px 5px;border-radius:2px;letter-spacing:1px;}
+.phcg{background:rgba(0,255,136,.08);color:var(--green);border:1px solid rgba(0,255,136,.2);}
+.phcr{background:rgba(255,34,68,.08);color:var(--red);border:1px solid rgba(255,34,68,.2);}
+.phcp{background:rgba(167,139,250,.08);color:var(--purple);border:1px solid rgba(167,139,250,.2);}
+.phca{background:rgba(255,170,0,.08);color:var(--amber);border:1px solid rgba(255,170,0,.2);}
+.pb{overflow-y:auto;max-height:290px;}
+.pb::-webkit-scrollbar{width:3px;}
+.pb::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.tabp{display:none;} .tabp.on{display:block;}
+.tabs{display:flex;border-bottom:1px solid var(--border);}
+.tabb{flex:1;padding:7px 4px;font-family:var(--mono);font-size:8px;letter-spacing:1.5px;
+  text-transform:uppercase;border:none;background:transparent;color:var(--muted);
+  cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;}
+.tabb.on{color:var(--cyan);border-bottom-color:var(--cyan);}
+
+/* device rows */
+.ar{display:flex;align-items:center;justify-content:space-between;
+  padding:8px 12px;border-bottom:1px solid var(--bfaint);animation:fi .3s ease;}
+.ar:hover{background:rgba(0,255,224,.03);}
+.tr2{display:grid;grid-template-columns:150px 1fr auto;gap:5px;align-items:start;
+  padding:9px 12px;border-bottom:1px solid var(--bfaint);animation:fi .35s ease;}
+.tr2:hover{background:rgba(255,34,68,.03);}
+.tr2.captive{border-left:2px solid var(--amber);background:rgba(255,170,0,.03);}
+.tr2.req-pending{border-left:2px solid var(--red);background:rgba(255,34,68,.04);}
+.cr2{padding:9px 12px;border-bottom:1px solid var(--bfaint);animation:fi .3s ease;}
+.cr2:hover{background:rgba(167,139,250,.03);}
+@keyframes fi{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+.ml{font-size:10px;color:var(--cyan2);letter-spacing:1.5px;}
+.ml.r{color:#ff6680;} .ml.p{color:var(--purple);}
+.st2{font-size:8px;color:var(--muted);margin-top:2px;}
+.it{font-size:8px;color:var(--amber);margin-top:2px;}
+.v6b,.otpb,.cbb,.reqb{display:inline-block;margin-top:2px;font-size:7px;padding:1px 4px;
+  border-radius:2px;letter-spacing:1px;text-transform:uppercase;}
+.v6b{background:rgba(0,255,136,.08);color:var(--green);border:1px solid rgba(0,255,136,.18);}
+.otpb{background:rgba(255,170,0,.1);color:var(--amber);border:1px solid rgba(255,170,0,.2);}
+.cbb{background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.2);}
+.reqb{background:rgba(255,34,68,.1);color:var(--red);border:1px solid rgba(255,34,68,.2);}
+.tblh{display:grid;grid-template-columns:150px 1fr auto;gap:5px;
+  padding:4px 12px;font-size:6px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);border-bottom:1px solid var(--bfaint);}
+.empty{padding:20px;text-align:center;font-size:9px;color:var(--muted);}
+.empty::before{content:'[ ';} .empty::after{content:' ]';}
+.btn-row{display:flex;flex-direction:column;gap:3px;}
+
+/* cert modal */
+.mover{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;
+  display:none;align-items:center;justify-content:center;}
+.mover.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:10px;
+  padding:24px;width:340px;max-width:90vw;}
+.modal h3{font-family:var(--disp);font-size:9px;letter-spacing:3px;color:var(--purple);
+  margin-bottom:16px;text-transform:uppercase;}
+.mf{margin-bottom:10px;}
+.mf label{display:block;font-size:7px;letter-spacing:2px;color:var(--muted);
+  text-transform:uppercase;margin-bottom:4px;}
+.mf input{width:100%;background:rgba(0,255,224,.04);border:1px solid var(--border);
+  color:var(--cyan);font-family:var(--mono);font-size:11px;padding:7px 10px;
+  border-radius:4px;outline:none;}
+.mbtns{display:flex;gap:7px;margin-top:16px;justify-content:flex-end;}
+
+/* toast */
+.toast{position:fixed;bottom:18px;right:18px;background:var(--bg2);
+  border:1px solid var(--border);border-radius:7px;padding:9px 14px;font-size:10px;
+  color:var(--cyan);z-index:2000;opacity:0;transform:translateY(8px);
+  transition:all .3s;pointer-events:none;}
+.toast.show{opacity:1;transform:none;}
+.toast.err{color:var(--red);border-color:rgba(255,34,68,.3);}
+.toast.ok{color:var(--green);border-color:rgba(0,255,136,.3);}
+.toast.warn{color:var(--amber);border-color:rgba(255,170,0,.3);}
+
+/* footer */
+.footer{border-top:1px solid var(--bfaint);padding-top:8px;margin-top:10px;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:7px;color:var(--muted);letter-spacing:1.5px;}
+.fclk{font-family:var(--disp);color:var(--cyan);font-size:8px;}
+</style>
+</head>
+<body>
+<script>const WIDS_TOKEN="{{ api_token }}";</script>
+
+<!-- CERT MODAL -->
+<div class="mover" id="certModal">
+  <div class="modal">
+    <h3>📜 Issue Authorization Certificate</h3>
+    <div class="mf"><label>Device Name</label>
+      <input type="text" id="cdname" placeholder="e.g. John's iPhone"></div>
+    <div class="mf"><label>Authorized By</label>
+      <input type="text" id="cisby" value="WIDS Admin"></div>
+    <input type="hidden" id="cmac">
+    <div class="mbtns">
+      <button class="btn bh" onclick="closeCert()">CANCEL</button>
+      <button class="btn bc" onclick="submitCert()">ISSUE</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<div class="wrap">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-box">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2L2 7v5c0 5.5 4.2 10.7 10 12 5.8-1.3 10-6.5 10-12V7L12 2z"/>
+          <path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div><h1>WIDS COMMAND CENTER v3.0</h1>
+        <p>MANUAL OTP · CAPTIVE PORTAL · IPV4+IPV6 BLACKHOLE</p></div>
+    </div>
+    <div class="tr">
+      <div class="ssid-tag">NET: <strong style="color:var(--cyan)">{{ your_ssid }}</strong></div>
+      <div id="hwP" class="pill poff"><span class="d"></span><span>ESP32 OFFLINE</span></div>
+      <div class="pill pon"><span class="d"></span><span>ARP ACTIVE</span></div>
+      <div class="pill potp"><span class="d"></span><span>OTP AUTH</span></div>
+      <div id="reqP" class="pill preq" style="display:none">
+        <span class="d"></span><span id="reqT">0 OTP REQUESTS</span></div>
+      <button class="logout-btn" onclick="logout()">LOGOUT</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="sc cc">
+      <div class="sl">802.11 Frames / Min</div>
+      <div class="sv" id="sF">0</div>
+      <div class="ss">Radio scanned</div>
+      <div class="spark"><canvas id="spk"></canvas></div>
+    </div>
+    <div class="sc cg">
+      <div class="sl">Authorized Devices</div>
+      <div class="sv" id="sA">0</div>
+      <div class="ss">Whitelisted MACs</div>
+    </div>
+    <div class="sc cr">
+      <div class="sl">Captive / Blocked</div>
+      <div class="sv" id="sB">0</div>
+      <div class="ss">Awaiting OTP</div>
+    </div>
+    <div class="sc cp">
+      <div class="sl">Certs Issued</div>
+      <div class="sv" id="sC">0</div>
+      <div class="ss">Device certificates</div>
+    </div>
+    <div class="sc ca">
+      <div class="sl">Server Uptime</div>
+      <div class="sv" id="sU">00:00</div>
+      <div class="ss">Since server started</div>
+    </div>
+  </div>
+
+  <!-- CHART -->
+  <div class="cp2">
+    <div class="chd">
+      <span class="ct">802.11 FRAME RATE — 60s WINDOW</span>
+      <span class="cl">Live · Manual OTP Mode</span>
+    </div>
+    <canvas id="mc"></canvas>
+  </div>
+
+  <!-- MAC INPUT -->
+  <div class="irow">
+    <input class="mi" id="macIn"
+      placeholder="XX:XX:XX:XX:XX:XX — ENTER MAC TO AUTHORIZE OR BLOCK"
+      maxlength="17" oninput="fmtMAC(this)">
+    <button class="btn ba blg" onclick="addMac()">▶ AUTHORIZE</button>
+    <button class="btn bb blg" onclick="manBlock()">■ FORCE BLOCK</button>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="mg">
+    <!-- LEFT: Authorized -->
+    <div class="panel">
+      <div class="ph">
+        <span class="pht g">✓ Authorized Entities</span>
+        <span class="phc phcg" id="aC">0</span>
+      </div>
+      <div class="pb" id="aB">
+        <div class="empty">No authorized devices</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Tabs -->
+    <div class="panel">
+      <div class="tabs">
+        <button class="tabb on" onclick="swTab('threats',this)">⚠ Threats / Captive</button>
+        <button class="tabb" onclick="swTab('certs',this)">📜 Certificates</button>
+      </div>
+
+      <!-- THREATS TAB -->
+      <div id="tab-threats" class="tabp on">
+        <div class="tblh">
+          <span>Target MAC / IP</span>
+          <span>Status</span>
+          <span>Actions</span>
+        </div>
+        <div class="pb" id="tB">
+          <div class="empty">Airwaves secure</div>
+        </div>
+      </div>
+
+      <!-- CERTS TAB -->
+      <div id="tab-certs" class="tabp">
+        <div class="ph" style="border-top:1px solid var(--bfaint);">
+          <span class="pht p">📜 Issued Certificates</span>
+          <span class="phc phcp" id="cC">0</span>
+        </div>
+        <div class="pb" id="cB">
+          <div class="empty">No certificates issued</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>WIDS v3.0 — Manual OTP · Captive Portal · Passive ARP · IPv4+IPv6 Blackhole</span>
+    <span class="fclk" id="clk">--:--:--</span>
+  </div>
+</div>
+
+<script>
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+let ttimer;
+function toast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+type+' show';
+  clearTimeout(ttimer); ttimer=setTimeout(()=>t.className='toast',3000);}
+
+async function api(url,method='GET',body=null){
+  try{
+    const o={method,headers:{'X-WIDS-Token':WIDS_TOKEN}};
+    if(body){o.headers['Content-Type']='application/json';o.body=JSON.stringify(body);}
+    const r=await fetch(url,o);
+    if(r.status===401){window.location.href='/login';return null;}
+    return await r.json();
+  }catch{return null;}}
+
+function fmtMAC(i){
+  let v=i.value.replace(/[^a-fA-F0-9]/g,'').toUpperCase();
+  if(v.length) v=v.match(/.{1,2}/g).join(':');
+  i.value=v.substring(0,17);}
+
+function getMAC(){
+  const v=document.getElementById('macIn').value.trim().toUpperCase();
+  return /^([0-9A-F]{2}:){5}[0-9A-F]{2}$/.test(v)?v:null;}
+
+function swTab(id,el){
+  document.querySelectorAll('.tabp').forEach(p=>p.className='tabp');
+  document.querySelectorAll('.tabb').forEach(t=>t.className='tabb');
+  document.getElementById('tab-'+id).className='tabp on';
+  el.className='tabb on';}
+
+async function addMac(){
+  const m=getMAC();
+  if(!m){toast('Invalid MAC format','err');return;}
+  const r=await api('/api/authorize/'+m,'POST');
+  if(r&&r.status==='authorized') toast('✓ '+m+' authorized','ok');
+  document.getElementById('macIn').value='';
+  refresh();}
+
+async function removeMac(m){
+  if(!confirm('Revoke '+m+'?'))return;
+  await api('/api/unauthorize/'+m,'POST');
+  toast('Revoked: '+m,'warn');
+  refresh();}
+
+async function manBlock(){
+  const m=getMAC();
+  if(!m){toast('Invalid MAC format','err');return;}
+  const r=await api('/api/manual_block/'+m,'POST');
+  if(r&&r.status==='no_ip'){toast('MAC not in ARP cache','err');return;}
+  toast('■ Blocked: '+m,'ok');
+  document.getElementById('macIn').value='';
+  refresh();}
+
+async function stopAtk(m){
+  await api('/api/stop_mitigation/'+m,'POST');
+  toast('Halted: '+m,'warn');
+  refresh();}
+
+async function approveDev(m){
+  if(!confirm('Authorize '+m+' WITHOUT OTP? (Admin override)'))return;
+  await api('/api/authorize/'+m,'POST');
+  toast('✓ '+m+' authorized (admin override)','ok');
+  refresh();}
+
+// ── SEND OTP — Admin manually sends OTP to device ────────────────
+async function sendOTP(mac,btn){
+  btn.disabled=true; btn.textContent='SENDING...';
+  const r=await api('/api/send_otp/'+mac,'POST');
+  if(r&&r.status==='sent'){
+    toast('✓ OTP sent to your Telegram for '+mac,'ok');
+    btn.textContent='✓ SENT';
+  }else{
+    toast('Failed to send OTP','err');
+    btn.disabled=false; btn.textContent='SEND OTP';
+  }
+  setTimeout(refresh,1000);}
+
+async function logout(){
+  await api('/auth/logout','POST');
+  window.location.href='/login';}
+
+// Cert modal
+function openCert(m){
+  document.getElementById('cmac').value=m;
+  document.getElementById('cdname').value='';
+  document.getElementById('certModal').classList.add('open');}
+function closeCert(){
+  document.getElementById('certModal').classList.remove('open');}
+async function submitCert(){
+  const m=document.getElementById('cmac').value;
+  const n=document.getElementById('cdname').value.trim()||'Unknown';
+  const b=document.getElementById('cisby').value.trim()||'WIDS Admin';
+  const r=await api('/api/issue_cert/'+m,'POST',{device_name:n,issued_by:b});
+  if(r&&r.status==='issued'){toast('📜 Cert issued: '+r.cert_id,'ok');closeCert();refresh();}
+  else toast('Failed','err');}
+function dlCert(m){
+  const a=document.createElement('a');
+  a.href='/api/cert/'+m; a.setAttribute('download',''); a.click();
+  toast('⬇ Downloading cert','ok');}
+
+/* charts */
+const spkD=Array(30).fill(0),chD=Array(60).fill(0);
+function dLine(cv,data,color,fill){
+  const dpr=window.devicePixelRatio||1,W=cv.offsetWidth,H=cv.offsetHeight;
+  if(!W||!H)return;
+  cv.width=W*dpr;cv.height=H*dpr;
+  const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+  const mx=Math.max(...data,1);ctx.clearRect(0,0,W,H);
+  if(fill){const gr=ctx.createLinearGradient(0,0,0,H);
+    gr.addColorStop(0,'rgba(0,255,224,.22)');gr.addColorStop(1,'rgba(0,255,224,.02)');
+    ctx.fillStyle=gr;ctx.beginPath();
+    data.forEach((v,i)=>{const x=(i/(data.length-1))*W,y=H-(v/mx)*H*.88;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+    ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();ctx.fill();}
+  ctx.strokeStyle=color;ctx.lineWidth=fill?1.5:1;ctx.lineJoin='round';ctx.beginPath();
+  data.forEach((v,i)=>{const x=(i/(data.length-1))*W,y=H-(v/mx)*H*.88-1;
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();}
+
+function pushC(p){
+  spkD.push(p);spkD.shift();chD.push(p);chD.shift();
+  const s=document.getElementById('spk'),m=document.getElementById('mc');
+  if(s)dLine(s,spkD,'#00ffe0',false);
+  if(m)dLine(m,chD,'#00ffe0',true);}
+
+function fmtUptime(s){
+  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;
+  if(h>0)return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+  return String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');}
+
+function updClock(){
+  document.getElementById('clk').textContent=
+    new Date().toLocaleTimeString('en-US',{hour12:false});}
+
+function renderAuth(list){
+  const b=document.getElementById('aB');
+  document.getElementById('aC').textContent=list.length;
+  document.getElementById('sA').textContent=list.length;
+  b.innerHTML='';
+  if(!list.length){
+    b.innerHTML='<div class="empty">No authorized devices</div>';return;}
+  list.forEach(item=>{
+    const row=document.createElement('div');row.className='ar';
+    const mac=document.createElement('div');mac.className='ml';mac.textContent=item.mac;
+    const btns=document.createElement('div');btns.style.cssText='display:flex;gap:4px;';
+    const bc=document.createElement('button');bc.className='btn bc';bc.textContent='CERT';
+    bc.onclick=()=>openCert(item.mac);
+    const br=document.createElement('button');br.className='btn br';br.textContent='REVOKE';
+    br.onclick=()=>removeMac(item.mac);
+    btns.append(bc,br);row.append(mac,btns);b.appendChild(row);});}
+
+function renderThreats(list){
+  const b=document.getElementById('tB');
+  document.getElementById('sB').textContent=list.length;
+  b.innerHTML='';
+  if(!list.length){
+    b.innerHTML='<div class="empty">Airwaves secure — no threats</div>';return;}
+  list.forEach(t=>{
+    const isReq=t.otp_requested&&!t.has_otp;
+    const hasOtp=t.has_otp;
+    const row=document.createElement('div');
+    row.className='tr2'+(isReq?' req-pending':' captive');
+    // Col 1
+    const c1=document.createElement('div');
+    const mac=document.createElement('div');mac.className='ml r';mac.textContent=t.mac;
+    const ip=document.createElement('div');ip.className='it';ip.textContent='IP: '+(t.ip||'...');
+    const ts=document.createElement('div');ts.className='st2';ts.textContent=t.time;
+    c1.append(mac,ip,ts);
+    // Col 2
+    const c2=document.createElement('div');
+    const re=document.createElement('div');re.className='re';re.textContent=t.reason;
+    const v6=document.createElement('span');v6.className='v6b';v6.textContent='IPv4+IPv6 BLOCKED';
+    c2.append(re,document.createElement('br'),v6);
+    if(isReq){
+      const rb=document.createElement('span');rb.className='reqb';
+      rb.textContent='⚡ OTP REQUESTED';c2.appendChild(rb);}
+    if(hasOtp){
+      const ob=document.createElement('span');ob.className='otpb';
+      ob.textContent='OTP SENT — AWAITING ENTRY';c2.appendChild(ob);}
+    // Col 3: action buttons
+    const c3=document.createElement('div');c3.className='btn-row';
+    // SEND OTP button — shown when device requested
+    const bOtp=document.createElement('button');
+    bOtp.className='btn botp';
+    bOtp.textContent=hasOtp?'RESEND OTP':'SEND OTP';
+    bOtp.onclick=function(){sendOTP(t.mac,this);};
+    c3.appendChild(bOtp);
+    // Approve button (override)
+    const bA=document.createElement('button');bA.className='btn ba';bA.textContent='APPROVE';
+    bA.onclick=()=>approveDev(t.mac);c3.appendChild(bA);
+    // Halt button
+    const bH=document.createElement('button');bH.className='btn bh';bH.textContent='HALT';
+    bH.onclick=()=>stopAtk(t.mac);c3.appendChild(bH);
+    row.append(c1,c2,c3);b.appendChild(row);});}
+
+function renderCerts(list){
+  const b=document.getElementById('cB'),cnt=document.getElementById('cC');
+  cnt.textContent=list.length;document.getElementById('sC').textContent=list.length;
+  b.innerHTML='';
+  if(!list.length){
+    b.innerHTML='<div class="empty">No certificates issued</div>';return;}
+  list.forEach(c=>{
+    const row=document.createElement('div');row.className='cr2';
+    const top=document.createElement('div');
+    top.style.cssText='display:flex;justify-content:space-between;align-items:flex-start;';
+    const left=document.createElement('div');
+    const mac=document.createElement('div');mac.className='ml p';mac.textContent=c.mac;
+    const nm=document.createElement('div');nm.className='st2';nm.textContent=c.name;
+    const ci=document.createElement('span');ci.className='cbb';ci.textContent='ID: '+c.cert_id;
+    const io=document.createElement('div');io.className='st2';
+    io.style.marginTop='2px';
+    io.textContent='IP: '+c.ip+' · '+c.issued_on;
+    left.append(mac,nm,ci,io);
+    const btn=document.createElement('button');btn.className='btn bc';
+    btn.textContent='⬇ DOWNLOAD';btn.onclick=()=>dlCert(c.mac);
+    top.append(left,btn);row.appendChild(top);b.appendChild(row);});}
+
+async function refresh(){
+  const [stats,auth,threats,certs]=await Promise.all([
+    api('/api/stats'),api('/api/authorized'),
+    api('/api/blocked'),api('/api/cert_list')]);
+  if(!stats)return;
+  document.getElementById('sF').textContent=stats.packets_per_min;
+  document.getElementById('sU').textContent=fmtUptime(stats.uptime_seconds||0);
+
+  // ESP32 status
+  const hw=document.getElementById('hwP');
+  if(stats.hardware_active){
+    hw.className='pill pon';
+    hw.innerHTML='<span class="d"></span><span>ESP32 ACTIVE</span>';}
+  else{
+    hw.className='pill poff';
+    hw.innerHTML='<span class="d"></span><span>ESP32 OFFLINE</span>';}
+
+  // Pending OTP requests badge
+  const pending=stats.pending_otp_requests||0;
+  const rp=document.getElementById('reqP');
+  if(pending>0){
+    rp.style.display='flex';
+    document.getElementById('reqT').textContent=pending+' OTP REQUEST'+(pending>1?'S':'');}
+  else rp.style.display='none';
+
+  pushC(stats.packets_per_min||0);
+  if(auth) renderAuth(auth);
+  if(threats) renderThreats(threats);
+  if(certs) renderCerts(certs);
+  updClock();}
+
+refresh();
+setInterval(refresh,1500);
+setInterval(updClock,1000);
+window.addEventListener('resize',()=>pushC(0));
+document.getElementById('certModal').addEventListener('click',function(e){
+  if(e.target===this)closeCert();});
+</script>
+</body>
+</html>
